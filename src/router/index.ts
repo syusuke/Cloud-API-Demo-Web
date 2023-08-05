@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { ERouterName } from '/@/types/index'
 import CreatePlan from '/@/components/task/CreatePlan.vue'
+import CreateJob from '/@/components/job/CreateJob.vue'
 import WaylinePanel from '/@/pages/page-web/projects/wayline.vue'
 import DockPanel from '/@/pages/page-web/projects/dock.vue'
 import LiveAgora from '/@/components/livestream-agora.vue'
 import LiveOthers from '/@/components/livestream-others.vue'
+import LiveMedisServer from '/@/components/livestream-mediaserver.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -103,6 +105,33 @@ const routes: Array<RouteRecordRaw> = [
           }
 
         ]
+      },
+      {
+        path: '/' + ERouterName.PLANJOB,
+        name: ERouterName.PLANJOB,
+        component: () => import('/@/pages/page-web/projects/planjob.vue'),
+        children: [
+          {
+            path: ERouterName.CREATE_JOB,
+            name: ERouterName.CREATE_JOB,
+            component: CreateJob,
+            children: [
+              {
+                path: ERouterName.SELECT_JOB,
+                name: ERouterName.SELECT_JOB,
+                components: {
+                  WaylinePanel,
+                  DockPanel
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: '/' + ERouterName.LIVEZLM,
+        name: ERouterName.LIVEZLM,
+        component: () => import('/@/pages/page-web/projects/livezlm.vue')
       }
     ]
   },

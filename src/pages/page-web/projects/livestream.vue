@@ -1,25 +1,17 @@
 <template>
   <div class="flex-column flex-justify-start flex-align-center">
-    <router-link
-      style="width: 90%; margin: auto;"
-      v-for="item in options"
-      :key="item.key"
-      :to="item.path"
-      :class="{
-        'menu-item': true,
-      }"
-    >
-    <a-button
-      class="mt10"
-      style="width:100%;"
-      type="primary"
-      @click="selectLivestream(item.routeName)"
-      >{{ item.label }}</a-button
-    >
+    <router-link style="width: 90%; margin: auto;" v-for="item in options" :key="item.key" :to="item.path" :class="{
+      'menu-item': true,
+    }">
+      <a-button class="mt10" style="width:100%;" type="primary" @click="selectLivestream(item.routeName)">{{ item.label
+      }}</a-button>
     </router-link>
   </div>
   <div class="live" v-if="showLive">
-    <a style="position: absolute; right: 10px; top: 10px; font-size: 16px; color: white;" @click="() => root.$router.push('/' + ERouterName.LIVESTREAM)"><CloseOutlined /></a>
+    <a style="position: absolute; right: 10px; top: 10px; font-size: 16px; color: white;"
+      @click="() => root.$router.push('/' + ERouterName.LIVESTREAM)">
+      <CloseOutlined />
+    </a>
     <router-view :name="routeName" />
   </div>
 </template>
@@ -36,10 +28,12 @@ const showLive = ref<boolean>(root.$route.name === ERouterName.LIVING)
 
 const options = [
   { key: 0, label: 'Agora Live', path: '/' + ERouterName.LIVESTREAM + '/' + ERouterName.LIVING, routeName: 'LiveAgora' },
-  { key: 1, label: 'RTMP/GB28181 Live', path: '/' + ERouterName.LIVESTREAM + '/' + ERouterName.LIVING, routeName: 'LiveOthers' }
+  { key: 1, label: 'RTMP/GB28181 Live', path: '/' + ERouterName.LIVESTREAM + '/' + ERouterName.LIVING, routeName: 'LiveOthers' },
+  { key: 2, label: 'Media服务器播放', path: '/' + ERouterName.LIVESTREAM + '/' + ERouterName.LIVING, routeName: 'LiveMedisServer' }
 ]
 
 const selectLivestream = (route: string) => {
+  console.log('test', route)
   showLive.value = root.$route.name === ERouterName.LIVING
   routeName.value = route
 }
@@ -62,15 +56,18 @@ onMounted(() => {
     padding-bottom: 0;
     margin: 0;
   }
+
   .ant-modal-content {
     display: flex;
     flex-direction: column;
     height: calc(100vh);
   }
+
   .ant-modal-body {
     flex: 1;
   }
 }
+
 .live {
   position: absolute;
   z-index: 1;

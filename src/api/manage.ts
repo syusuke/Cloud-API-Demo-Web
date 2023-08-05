@@ -1,21 +1,24 @@
 import { Firmware, FirmwareQueryParam, FirmwareUploadParam } from '/@/types/device-firmware'
 import request, { CommonListResponse, IListWorkspaceResponse, IPage, IWorkspaceResponse } from '/@/api/http/request'
 import { Device } from '/@/types/device'
+import exp from 'constants'
 
 const HTTP_PREFIX = '/manage/api/v1'
 
 // login
 export interface LoginBody {
- username: string,
- password: string,
- flag: number,
+  username: string,
+  password: string,
+  flag: number,
 }
+
 export interface BindBody {
   device_sn: string,
   user_id: string,
   workspace_id: string,
   domain?: string
 }
+
 export interface HmsQueryBody {
   sns: string[],
   children_sn: string,
@@ -28,6 +31,11 @@ export interface HmsQueryBody {
   domain: number,
 }
 
+export const cloudApiInfo = async function (workspaceId: string): Promise<IWorkspaceResponse<any>> {
+  const url = `${HTTP_PREFIX}/cloudApiInfo?workspaceId=${workspaceId}`
+  const result = await request.get(url)
+  return result.data
+}
 export const login = async function (body: LoginBody): Promise<IWorkspaceResponse<any>> {
   const url = `${HTTP_PREFIX}/login`
   const result = await request.post(url, body)
@@ -181,7 +189,9 @@ export const importFirmareFile = async function (workspaceId: string, param: For
   return result.data
 }
 
-export const changeFirmareStatus = async function (workspaceId: string, firmwareId: string, param: {status: boolean}): Promise<IWorkspaceResponse<any>> {
+export const changeFirmareStatus = async function (workspaceId: string, firmwareId: string, param: {
+  status: boolean
+}): Promise<IWorkspaceResponse<any>> {
   const url = `${HTTP_PREFIX}/workspaces/${workspaceId}/firmwares/${firmwareId}`
   const result = await request.put(url, param)
   return result.data

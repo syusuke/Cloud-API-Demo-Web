@@ -58,7 +58,9 @@ export default defineComponent({
       { key: 2, label: 'Annotations', path: '/' + ERouterName.LAYER, icon: 'EnvironmentOutlined' },
       { key: 3, label: 'Media Files', path: '/' + ERouterName.MEDIA, icon: 'PictureOutlined' },
       { key: 4, label: 'Flight Route Library', path: '/' + ERouterName.WAYLINE, icon: 'NodeIndexOutlined' },
-      { key: 5, label: 'Task Plan Library', path: '/' + ERouterName.TASK, icon: 'CalendarOutlined' }
+      { key: 5, label: 'Task Plan Library', path: '/' + ERouterName.TASK, icon: 'CalendarOutlined' },
+      { key: 6, label: 'Flight Plan Job', path: '/' + ERouterName.PLANJOB, icon: 'BellOutlined' },
+      { key: 7, label: 'ZLM视频播放', path: '/' + ERouterName.LIVEZLM, icon: 'VideoCameraOutlined' },
     ]
 
     function selectedRoute (item: IOptions) {

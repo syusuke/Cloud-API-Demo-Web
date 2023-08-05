@@ -1,45 +1,59 @@
 <template>
   <div class="create-plan-wrapper">
     <div class="header">
-      Create Plan
+      Create Job
     </div>
     <div class="content">
-      <a-form ref="valueRef" layout="horizontal" :hideRequiredMark="true" :rules="rules" :model="planBody"
-        labelAlign="left">
+      <a-form ref="valueRef" layout="horizontal" :hideRequiredMark="true" :rules="rules" :model="planJobBody"
+              labelAlign="left">
+
+        <!-- 航线名 -->
         <a-form-item label="Plan Name" name="name" :labelCol="{ span: 23 }">
-          <a-input style="background: black;" placeholder="Please enter plan name" v-model:value="planBody.name" />
+          <a-input style="background: black;" placeholder="Please enter plan name" v-model:value="planJobBody.name"/>
         </a-form-item>
-        <!-- 航线 -->
+        <!-- 航线名 -->
+        <a-form-item label="Description" name="description" :labelCol="{ span: 23 }">
+          <a-input style="background: black;" placeholder="Please enter plan description"
+                   v-model:value="planJobBody.description"/>
+        </a-form-item>
+
+        <!-- 选择航线 -->
         <a-form-item label="Flight Route" :wrapperCol="{ offset: 7 }" name="file_id">
-          <router-link :to="{ name: 'select-plan' }" @click="selectRoute">
+          <router-link :to="{ name: 'select-job' }" @click="selectRoute">
             Select Route
           </router-link>
         </a-form-item>
-        <a-form-item v-if="planBody.file_id" style="margin-top: -15px;">
+        <!-- 选择中的航线 -->>
+        <a-form-item v-if="planJobBody.file_id" style="margin-top: -15px;">
           <div class="wayline-panel" style="padding-top: 5px;">
             <div class="title">
               <a-tooltip :title="wayline.name">
-                <div class="pr10" style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{
-                  wayline.name }}</div>
+                <div class="pr10" style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                  {{
+                    wayline.name
+                  }}
+                </div>
               </a-tooltip>
               <div class="ml10">
-                <UserOutlined />
+                <UserOutlined/>
               </div>
               <a-tooltip :title="wayline.user_name">
                 <div class="ml5 pr10"
-                  style="width: 80px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{
+                     style="width: 80px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{
                     wayline.user_name
-                  }}</div>
+                  }}
+                </div>
               </a-tooltip>
             </div>
             <div class="ml10 mt5" style="color: hsla(0,0%,100%,0.65);">
               <span>
-                <RocketOutlined />
+                <RocketOutlined/>
               </span>
-              <span class="ml5">{{ Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(wayline.drone_model_key)]
-              }}</span>
+              <span class="ml5">{{
+                  Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(wayline.drone_model_key)]
+                }}</span>
               <span class="ml10">
-                <CameraFilled style="border-top: 1px solid; padding-top: -3px;" />
+                <CameraFilled style="border-top: 1px solid; padding-top: -3px;"/>
               </span>
               <span class="ml5" v-for="payload in wayline.payload_model_keys" :key="payload.id">
                 {{ Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(payload)] }}
@@ -50,57 +64,49 @@
             </div>
           </div>
         </a-form-item>
-        <!-- 设备 -->
-        <a-form-item label="Device" :wrapperCol="{ offset: 10 }" v-model:value="planBody.dock_sn" name="dock_sn">
-          <router-link :to="{ name: 'select-plan' }" @click="selectDevice">Select Device</router-link>
+
+        <!-- 无人机设备 -->
+        <a-form-item label="Device" :wrapperCol="{ offset: 10 }" v-model:value="planJobBody.dock_sn" name="dock_sn">
+          <router-link :to="{ name: 'select-job' }" @click="selectDevice">Select Device</router-link>
         </a-form-item>
-        <a-form-item v-if="planBody.dock_sn" style="margin-top: -15px;">
+        <!-- 选中的无人机 -->
+        <a-form-item v-if="planJobBody.dock_sn" style="margin-top: -15px;">
           <div class="panel" style="padding-top: 5px;" @click="selectDock(dock)">
             <div class="title">
               <a-tooltip :title="dock.nickname">
-                <div class="pr10" style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{
-                  dock.nickname }}</div>
+                <div class="pr10" style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                  {{
+                    dock.nickname
+                  }}
+                </div>
               </a-tooltip>
             </div>
             <div class="ml10 mt5" style="color: hsla(0,0%,100%,0.65);">
               <span>
-                <RocketOutlined />
+                <RocketOutlined/>
               </span>
               <span class="ml5">{{ dock.children?.nickname ?? 'No drone' }}</span>
             </div>
           </div>
         </a-form-item>
-        <!-- 任务类型 -->
-        <a-form-item label="Plan Timer" class="plan-timer-form-item" :labelCol="{ span: 23 }">
-          <div style="white-space: nowrap;">
-            <a-radio-group v-model:value="planBody.task_type" button-style="solid">
-              <a-radio-button v-for="type in TaskTypeOptions" :value="type.value" :key="type.value">
-                {{ type.label }}
-              </a-radio-button>
-            </a-radio-group>
-          </div>
-        </a-form-item>
-        <!-- 执行时间 -->
-        <a-form-item label="Start Time" v-if="planBody.task_type === TaskType.Timed" name="select_execute_time"
-          :labelCol="{ span: 23 }">
-          <a-date-picker v-model:value="planBody.select_execute_time" format="YYYY-MM-DD HH:mm:ss" show-time
-            placeholder="Select Time" />
-        </a-form-item>
+
         <!-- RTH Altitude Relative to Dock -->
         <a-form-item label="RTH Altitude Relative to Dock (m)" :labelCol="{ span: 23 }" name="rth_altitude">
-          <a-input-number v-model:value="planBody.rth_altitude" :min="20" :max="1500" class="width-100" required>
+          <a-input-number v-model:value="planJobBody.rth_altitude" :min="20" :max="1500" class="width-100" required>
           </a-input-number>
         </a-form-item>
+
         <!-- Lost Action -->
-        <a-form-item label="Lost Action" :labelCol="{ span: 23 }" name="out_of_control_action">
+        <a-form-item label="Lost Action" :labelCol="{ span: 23 }" name="out_of_control">
           <div style="white-space: nowrap;">
-            <a-radio-group v-model:value="planBody.out_of_control_action" button-style="solid">
+            <a-radio-group v-model:value="planJobBody.out_of_control" button-style="solid">
               <a-radio-button v-for="action in OutOfControlActionOptions" :value="action.value" :key="action.value">
                 {{ action.label }}
               </a-radio-button>
             </a-radio-group>
           </div>
         </a-form-item>
+
         <a-form-item class="width-100" style="margin-bottom: 40px;">
           <div class="footer">
             <a-button class="mr10" style="background: #3c3c3c;" @click="closePlan">Cancel
@@ -109,17 +115,20 @@
             </a-button>
           </div>
         </a-form-item>
+
       </a-form>
+
     </div>
   </div>
+
   <div v-if="drawerVisible"
-    style="position: absolute; left: 335px; width: 280px; height: 100vh; float: right; top: 0; z-index: 1000; color: white; background: #282828;">
+       style="position: absolute; left: 335px; width: 280px; height: 100vh; float: right; top: 0; z-index: 1000; color: white; background: #282828;">
     <div>
-      <router-view :name="routeName" />
+      <router-view :name="routeName"/>
     </div>
     <div style="position: absolute; top: 15px; right: 10px;">
       <a style="color: white;" @click="closePanel">
-        <CloseOutlined />
+        <CloseOutlined/>
       </a>
     </div>
   </div>
@@ -127,12 +136,19 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, reactive, ref, toRaw, UnwrapRef } from 'vue'
-import { CloseOutlined, RocketOutlined, CameraFilled, UserOutlined, PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons-vue'
+import {
+  CloseOutlined,
+  RocketOutlined,
+  CameraFilled,
+  UserOutlined,
+  PlusCircleOutlined,
+  MinusCircleOutlined
+} from '@ant-design/icons-vue'
 import { ELocalStorageKey, ERouterName } from '/@/types'
 import { useMyStore } from '/@/store'
 import { WaylineType, WaylineFile } from '/@/types/wayline'
 import { Device, EDeviceType } from '/@/types/device'
-import { createPlan, CreatePlan } from '/@/api/wayline'
+import { createPlanJob, CreatePlanJob } from '/@/api/planjob'
 import { getRoot } from '/@/root'
 import { TaskType, OutOfControlActionOptions, OutOfControlAction, TaskTypeOptions } from '/@/types/task'
 import moment, { Moment } from 'moment'
@@ -154,53 +170,70 @@ const dock = computed<Device>(() => {
 const disabled = ref(false)
 
 const routeName = ref('')
-const planBody = reactive({
+const planJobBody = reactive({
   name: '',
+  description: '',
   file_id: computed(() => store.state.waylineInfo.id),
   dock_sn: computed(() => store.state.dockInfo.device_sn),
   task_type: TaskType.Immediate,
-  select_execute_time: undefined as Moment | undefined,
-  rth_altitude: '',
-  out_of_control_action: OutOfControlAction.ReturnToHome,
+  wayline_type: WaylineType, // 航线类型
+  rth_altitude: 50,
+  out_of_control: OutOfControlAction.ReturnToHome,
 })
 
 const drawerVisible = ref(false)
 const valueRef = ref()
 const rules = {
   name: [
-    { required: true, message: 'Please enter plan name.' },
-    { max: 20, message: 'Length should be 1 to 20', trigger: 'blur' }
+    {
+      required: true,
+      message: 'Please enter plan name.'
+    },
+    {
+      max: 50,
+      message: 'Length should be 1 to 20',
+      trigger: 'blur'
+    }
   ],
-  file_id: [{ required: true, message: 'Select Route' }],
-  dock_sn: [{ required: true, message: 'Select Device' }],
-  select_execute_time: [{ required: true, message: 'Select start time' }],
+  file_id: [{
+    required: true,
+    message: 'Select Route'
+  }],
+  dock_sn: [{
+    required: true,
+    message: 'Select Device'
+  }],
   rth_altitude: [
     {
       validator: async (rule: RuleObject, value: string) => {
         if (!/^[0-9]{1,}$/.test(value)) {
           throw new Error('RTH Altitude Relative Require number')
         }
+        const altitude = parseInt(value)
+        if (altitude < 20 || altitude > 500) {
+          throw new Error('RTH Altitude Relative must between 20 to 500')
+        }
       },
     }
   ],
-  out_of_control_action: [{ required: true, message: 'Select Lost Action' }],
+  out_of_control: [{
+    required: true,
+    message: 'Select Lost Action'
+  }],
 }
 
 function onSubmit () {
   valueRef.value.validate().then(() => {
     disabled.value = true
-    const createPlanBody = { ...planBody } as unknown as CreatePlan
-    if (planBody.select_execute_time) {
-      createPlanBody.task_days = [moment(planBody.select_execute_time).unix()]
-      createPlanBody.task_periods = [createPlanBody.task_days]
-    }
+    const createPlanBody = { ...planJobBody } as unknown as CreatePlanJob
     createPlanBody.rth_altitude = Number(createPlanBody.rth_altitude)
     if (wayline.value && wayline.value.template_types && wayline.value.template_types.length > 0) {
       createPlanBody.wayline_type = wayline.value.template_types[0]
     }
-    // console.log('planBody', createPlanBody)
-    createPlan(workspaceId, createPlanBody)
+    // console.log('planJobBody', createPlanBody)
+    createPlanJob(workspaceId, createPlanBody)
       .then(res => {
+        console.log('createPlanJob', res)
         disabled.value = false
       }).finally(() => {
         closePlan()
@@ -211,7 +244,7 @@ function onSubmit () {
 }
 
 function closePlan () {
-  root.$router.push('/' + ERouterName.TASK)
+  root.$router.push('/' + ERouterName.PLANJOB)
 }
 
 function closePanel () {
@@ -228,12 +261,13 @@ function selectDevice () {
   drawerVisible.value = true
   routeName.value = 'DockPanel'
 }
+
 </script>
 
 <style lang="scss">
 .create-plan-wrapper {
   background-color: #232323;
-  color: fff;
+  color: white;
   padding-bottom: 0;
   height: 100vh;
   display: flex;

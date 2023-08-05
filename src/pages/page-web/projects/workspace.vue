@@ -16,6 +16,12 @@
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.TASK">
         <TaskPanel />
       </div>
+      <div class="task-wrapper" v-if="root.$route.name === ERouterName.PLANJOB">
+        <PlanJobPanel />
+      </div>
+      <div class="task-wrapper" v-if="root.$route.name === ERouterName.LIVEFLV">
+        <PlanJobPanel />
+      </div>
     </div>
   </div>
 </template>
@@ -23,6 +29,7 @@
 import Sidebar from '/@/components/common/sidebar.vue'
 import MediaPanel from '/@/components/MediaPanel.vue'
 import TaskPanel from '/@/components/task/TaskPanel.vue'
+import PlanJobPanel from '/@/components/job/PlanJobPanel.vue'
 import GMap from '/@/components/GMap.vue'
 import { EBizCode, ERouterName } from '/@/types'
 import { getRoot } from '/@/root'

@@ -1,41 +1,25 @@
 <template>
   <div class="login flex-column flex-justify-center flex-align-center m0 b0">
-    <a-image
-      style="width: 17vw; height: 10vw; margin-bottom: 50px"
-      :src="djiLogo"
-    />
+    <a-image style="width: 17vw; height: 10vw; margin-bottom: 50px" :src="djiLogo" />
     <p class="logo fz35 pb50">Pilot Cloud API Demo</p>
-    <a-form
-      layout="inline"
-      :model="formState"
-      class="flex-row flex-justify-center flex-align-center"
-    >
+    <a-form layout="inline" :model="formState" class="flex-row flex-justify-center flex-align-center">
       <a-form-item>
         <a-input v-model:value="formState.username" placeholder="Username">
-          <template #prefix
-            ><UserOutlined style="color: rgba(0, 0, 0, 0.25)"
-          /></template>
+          <template #prefix>
+            <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
+          </template>
         </a-input>
       </a-form-item>
       <a-form-item>
-        <a-input
-          v-model:value="formState.password"
-          type="password"
-          placeholder="Password"
-        >
-          <template #prefix
-            ><LockOutlined style="color: rgba(0, 0, 0, 0.25)"
-          /></template>
+        <a-input v-model:value="formState.password" type="password" placeholder="Password">
+          <template #prefix>
+            <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+          </template>
         </a-input>
       </a-form-item>
       <a-form-item>
-        <a-button
-          class="m0"
-          type="primary"
-          html-type="submit"
-          :disabled="formState.user === '' || formState.password === ''"
-          @click="onSubmit"
-        >
+        <a-button class="m0" type="primary" html-type="submit"
+          :disabled="formState.username === '' || formState.password === ''" @click="onSubmit">
           Login
         </a-button>
       </a-form-item>
@@ -47,7 +31,7 @@
 import { message } from 'ant-design-vue'
 import { onMounted, reactive, ref, UnwrapRef } from 'vue'
 import { CURRENT_CONFIG } from '/@/api/http/config'
-import { login, LoginBody, refreshToken } from '/@/api/manage'
+import { cloudApiInfo, login, LoginBody, refreshToken } from '/@/api/manage'
 import apiPilot from '/@/api/pilot-bridge'
 import { getRoot } from '/@/root'
 import router from '/@/router'
@@ -62,19 +46,28 @@ const formState: UnwrapRef<LoginBody> = reactive({
   password: 'pilot123',
   flag: EUserType.Pilot,
 })
+
 const isVerified = ref<boolean>(false)
+
 onMounted(async () => {
-  verifyLicense()
+  /*  verifyLicense()
   if (!isVerified.value) {
     return
-  }
+  } */
 
   apiPilot.setPlatformMessage('Cloud Api Platform', '', '')
 
   const token = localStorage.getItem(ELocalStorageKey.Token)
-  if (token) {
+  const workspaceId = localStorage.getItem(ELocalStorageKey.WorkspaceId)
+  if (token && workspaceId) {
     await refreshToken({})
       .then(res => {
+        verifyLicense(workspaceId)
+        if (!isVerified.value) {
+          message.error('verify the license error.')
+          return
+        }
+
         apiPilot.setComponentParam(EComponentName.Api, {
           host: CURRENT_CONFIG.baseURL,
           token: res.data.access_token
@@ -96,12 +89,19 @@ onMounted(async () => {
 const onSubmit = async (e: any) => {
   await login(formState)
     .then(res => {
-      if (!isVerified.value) {
-        message.error('Please verify the license firstly.')
-        return
-      }
+      // if (!isVerified.value) {
+      //   message.error('Please verify the license firstly.')
+      //   return
+      // }
       console.log('login res:', res)
       if (res.code === 0) {
+        verifyLicense(res.data.workspace_id)
+
+        if (!isVerified.value) {
+          message.error('verify the license error.')
+          return
+        }
+
         apiPilot.setComponentParam(EComponentName.Api, {
           host: CURRENT_CONFIG.baseURL,
           token: res.data.access_token
@@ -126,23 +126,41 @@ const onSubmit = async (e: any) => {
     })
 }
 
-function verifyLicense () {
-  isVerified.value = apiPilot.platformVerifyLicense(CURRENT_CONFIG.appId, CURRENT_CONFIG.appKey, CURRENT_CONFIG.appLicense) &&
-    apiPilot.isPlatformVerifySuccess()
-  if (isVerified.value) {
-    message.success('The license verification is successful.')
-  } else {
-    message.error('Filed to verify the license. Please check license whether the license is correct, or apply again.')
-  }
+function verifyLicense (workspaceId: string) {
+  cloudApiInfo(workspaceId)
+    .then(res => {
+      console.log('get cloud api info res:', res)
+      if (res.code === 0) {
+        const app = res.data.app_id
+        const key = res.data.app_key
+        const license = res.data.app_license
+        console.log('appId', app)
+        console.log('key', key)
+        console.log('license', license)
+        // isVerified.value = apiPilot.platformVerifyLicense(CURRENT_CONFIG.appId, CURRENT_CONFIG.appKey, CURRENT_CONFIG.appLicense) &&
+        isVerified.value = apiPilot.platformVerifyLicense(app, key, license) &&
+          apiPilot.isPlatformVerifySuccess()
+        if (isVerified.value) {
+          message.success('The license verification is successful.')
+        } else {
+          message.error('Filed to verify the license. Please check license whether the license is correct, or apply again.')
+        }
+      }
+    })
+    .catch(err => {
+      message.error(err)
+    })
 }
 </script>
 
 <style lang="scss" scoped>
 @import '/@/styles/index.scss';
+
 .login {
   // background-color: $dark-highlight;
   height: 100vh;
 }
+
 .logo {
   color: $primary;
 }

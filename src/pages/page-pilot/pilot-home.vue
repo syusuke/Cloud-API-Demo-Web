@@ -269,6 +269,7 @@ onMounted(() => {
   }
 
   device.data.sn = apiPilot.getAircraftSN()
+
   getDeviceInfo()
 
   const isLoaded = apiPilot.isComponentLoaded(EComponentName.Thing)

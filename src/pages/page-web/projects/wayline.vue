@@ -186,6 +186,7 @@ function downloadWayline (waylineId: string, fileName: string) {
 }
 
 function selectRoute (wayline: WaylineFile) {
+  console.log('select wayline', wayline.name)
   store.commit('SET_SELECT_WAYLINE_INFO', wayline)
 }
 
