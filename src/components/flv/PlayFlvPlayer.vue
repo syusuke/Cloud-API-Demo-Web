@@ -8,7 +8,7 @@
           <a-space wrap>
             <a-tag color="default">
               <template #icon>
-                <camera-outlined />
+                <camera-outlined/>
               </template>
               拍照模式
             </a-tag>
@@ -21,21 +21,24 @@
           <a-space wrap>
             <a-tag color="default">
               <template #icon>
-                <video-camera-outlined />
+                <video-camera-outlined/>
               </template>
               录制模式
             </a-tag>
             <a-button type="primary" size="small" @click="requestPayloadControl" danger>获取负载控制权</a-button>
             <a-button type="primary" size="small" :disabled="!(recordingState === 0)"
-              @click="startRecording">开始录像</a-button>
+                      @click="startRecording">开始录像
+            </a-button>
             <a-button type="primary" size="small" :disabled="!(recordingState === 1)"
-              @click="stopRecording">停止录像</a-button></a-space>
+                      @click="stopRecording">停止录像
+            </a-button>
+          </a-space>
         </template>
 
         <template v-else>
           <a-tag color="error">
             <template #icon>
-              <question-circle-outlined />
+              <question-circle-outlined/>
             </template>
             不支持拍照或者录像
           </a-tag>
@@ -43,7 +46,8 @@
 
       </div>
       <div class="info">
-        <a-input-search v-model:value="liveUrl" addon-before="播放URL" placeholder="视频直播URL" @search="reloadVideoUrl">
+        <a-input-search v-model:value="liveUrl" addon-before="播放URL" placeholder="视频直播URL"
+                        @search="reloadVideoUrl">
           <template #enterButton>
             <a-button>加载</a-button>
           </template>
@@ -53,7 +57,7 @@
       <div class="flex-row flex-justify-center flex-align-center mt10">
         <a-space wrap>
           <a-tooltip title="刷新列表">
-            <a-button type="primary" shape="circle" size="small" :icon="h(RedoOutlined)" />
+            <a-button type="primary" shape="circle" size="small" :icon="h(RedoOutlined)"/>
           </a-tooltip>
           <a-select style="width:150px" placeholder="选择设备">
             <a-select-option v-for="item in droneList" :key="item.value" :value="item.value">
@@ -77,7 +81,8 @@
 <script lang="ts" setup>
 import { ref } from '@vue/reactivity'
 import { onMounted, onUnmounted, defineProps, reactive, watch, h } from 'vue'
-import Player from 'xgplayer'
+import Player, { Events } from 'xgplayer'
+
 import FlvPlugin from 'xgplayer-flv'
 import 'xgplayer/dist/index.min.css'
 import { LiveVideoInfoItem } from '/@/api/liveflv'
@@ -88,6 +93,7 @@ import {
   RedoOutlined
 } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
+import RefreshPlugin from './RefreshPlugin.js'
 
 const props = defineProps({
   compentId: String,
@@ -109,7 +115,7 @@ const playerConfig = {
   autoplay: true,
   autoplayMuted: true,
   isLive: true,
-  plugins: [FlvPlugin],
+  plugins: [RefreshPlugin, FlvPlugin],
   allowSeekAfterEnded: false,
   closeVideoDblclick: true,
   fetchOptions: {
@@ -124,7 +130,8 @@ const playerConfig = {
   },
   playbackRate: [],
   keyShortcut: false,
-  lang: 'zh'
+  // lang: 'zh',
+  refresh: true
 }
 
 let player: Player
@@ -138,7 +145,14 @@ const droneList = ref()
 const cameraList = ref()
 const currentVideoInfo = reactive({} as LiveVideoInfoItem)
 
+const pluginName = function (p) {
+  // 插件逻辑
+  console.log(p)
+}
+
 onMounted(() => {
+  Player.install('pluginName', pluginName)
+  console.log('isHevcSupported', Player.isHevcSupported())
   const info = props.videoInfo as LiveVideoInfoItem
   // liveVideoInfo.value = info
   Object.assign(currentVideoInfo, info)
@@ -183,6 +197,7 @@ function reloadVideoUrl () {
   const newVideoUrl = liveUrl.value
   currentVideoInfo.url = newVideoUrl
 }
+
 function isLegalLiveUrl (newVideoUrl: string) {
   return newVideoUrl.startsWith('http://') || newVideoUrl.startsWith('https://')
 }
@@ -198,6 +213,7 @@ function takePhoto () {
 function startRecording () {
 
 }
+
 function stopRecording () {
 }
 
