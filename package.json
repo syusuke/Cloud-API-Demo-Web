@@ -16,7 +16,6 @@
     "ant-design-vue": "^2.2.8",
     "axios": "^0.21.1",
     "eventemitter3": "^5.0.0",
-    "flv.js": "^1.6.2",
     "mitt": "^3.0.0",
     "mqtt": "^4.3.7",
     "query-string": "^7.0.1",
@@ -28,9 +27,12 @@
     "vite-plugin-package-config": "^0.1.1",
     "vue": "^3.2.26",
     "vue-cookies": "^1.7.4",
+    "vue-grid-layout": "^2.4.0",
     "vue-i18n": "^9.1.6",
     "vue-router": "4",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "xgplayer": "^3.0.7",
+    "xgplayer-flv": "^3.0.7"
   },
   "devDependencies": {
     "@types/node": "^16.3.2",
@@ -102,7 +104,6 @@
         "ant-design-vue/es/upload/style/css",
         "axios",
         "eventemitter3",
-        "flv.js",
         "lodash",
         "mitt",
         "moment",
@@ -112,7 +113,10 @@
         "vconsole",
         "vue",
         "vue-router",
-        "vuex"
+        "vuex",
+        "xgplayer",
+        "xgplayer-flv",
+        "xgplayer-flv/es/flv/options"
       ]
     }
   }

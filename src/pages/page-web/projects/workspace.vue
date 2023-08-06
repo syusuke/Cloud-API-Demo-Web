@@ -6,7 +6,7 @@
         <router-view />
       </div>
     </div>
-    <div class="right">
+    <div class="middle">
       <div class="map-wrapper">
         <GMap />
       </div>
@@ -20,9 +20,10 @@
         <PlanJobPanel />
       </div>
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.LIVEFLV">
-        <PlanJobPanel />
+        <PlayFlvPanel />
       </div>
     </div>
+
   </div>
 </template>
 <script lang="ts" setup>
@@ -30,6 +31,7 @@ import Sidebar from '/@/components/common/sidebar.vue'
 import MediaPanel from '/@/components/MediaPanel.vue'
 import TaskPanel from '/@/components/task/TaskPanel.vue'
 import PlanJobPanel from '/@/components/job/PlanJobPanel.vue'
+import PlayFlvPanel from '/@/components/flv/PlayFlvPanel.vue'
 import GMap from '/@/components/GMap.vue'
 import { EBizCode, ERouterName } from '/@/types'
 import { getRoot } from '/@/root'
@@ -147,11 +149,11 @@ useConnectWebSocket(messageHandler)
     }
   }
 
-  .right {
+  .middle {
     flex-grow: 1;
     position: relative;
 
-    .map-wrapper{
+    .map-wrapper {
       width: 100%;
       height: 100%;
     }
@@ -166,6 +168,10 @@ useConnectWebSocket(messageHandler)
       z-index: 100;
       background: #f6f8fa;
     }
+  }
+
+  .right {
+    background-color: aquamarine;
   }
 }
 </style>

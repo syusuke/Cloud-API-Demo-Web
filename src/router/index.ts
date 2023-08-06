@@ -129,9 +129,9 @@ const routes: Array<RouteRecordRaw> = [
         ]
       },
       {
-        path: '/' + ERouterName.LIVEZLM,
-        name: ERouterName.LIVEZLM,
-        component: () => import('/@/pages/page-web/projects/livezlm.vue')
+        path: '/' + ERouterName.LIVEFLV,
+        name: ERouterName.LIVEFLV,
+        component: () => import('/@/pages/page-web/projects/liveflv.vue')
       }
     ]
   },

@@ -60,7 +60,7 @@ export default defineComponent({
       { key: 4, label: 'Flight Route Library', path: '/' + ERouterName.WAYLINE, icon: 'NodeIndexOutlined' },
       { key: 5, label: 'Task Plan Library', path: '/' + ERouterName.TASK, icon: 'CalendarOutlined' },
       { key: 6, label: 'Flight Plan Job', path: '/' + ERouterName.PLANJOB, icon: 'BellOutlined' },
-      { key: 7, label: 'ZLM视频播放', path: '/' + ERouterName.LIVEZLM, icon: 'VideoCameraOutlined' },
+      { key: 7, label: 'FLV视频播放', path: '/' + ERouterName.LIVEFLV, icon: 'VideoCameraOutlined' },
     ]
 
     function selectedRoute (item: IOptions) {

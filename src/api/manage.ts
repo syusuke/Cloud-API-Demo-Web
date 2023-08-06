@@ -1,7 +1,6 @@
 import { Firmware, FirmwareQueryParam, FirmwareUploadParam } from '/@/types/device-firmware'
 import request, { CommonListResponse, IListWorkspaceResponse, IPage, IWorkspaceResponse } from '/@/api/http/request'
 import { Device } from '/@/types/device'
-import exp from 'constants'
 
 const HTTP_PREFIX = '/manage/api/v1'
 
