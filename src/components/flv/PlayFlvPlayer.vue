@@ -2,7 +2,7 @@
   <div>
     <div class="player-item">
       <div :id="props.compentId" class="video-container"></div>
-      <div class="flex-row flex-justify-center flex-align-center" v-if="enablePayload">
+      <div class="flex-row flex-justify-center flex-align-center" v-if="isPayloadIndex">
 
         <template v-if="cameraMode === 0">
           <a-space wrap>
@@ -26,11 +26,9 @@
               录制模式
             </a-tag>
             <a-button type="primary" size="small" @click="requestPayloadControl" danger>获取负载控制权</a-button>
-            <a-button type="primary" size="small" :disabled="!(recordingState === 0)"
-                      @click="startRecording">开始录像
+            <a-button type="primary" size="small" :disabled="!(recordingState === 0)" @click="startRecording">开始录像
             </a-button>
-            <a-button type="primary" size="small" :disabled="!(recordingState === 1)"
-                      @click="stopRecording">停止录像
+            <a-button type="primary" size="small" :disabled="!(recordingState === 1)" @click="stopRecording">停止录像
             </a-button>
           </a-space>
         </template>
@@ -70,6 +68,7 @@
             </a-select-option>
           </a-select>
 
+          <a-button type="primary">获取URL</a-button>
           <a-button type="primary">开始直播</a-button>
           <a-button type="primary">停止直播</a-button>
         </a-space>
@@ -80,12 +79,13 @@
 
 <script lang="ts" setup>
 import { ref } from '@vue/reactivity'
-import { onMounted, onUnmounted, defineProps, reactive, watch, h } from 'vue'
+import { onMounted, onUnmounted, defineProps, reactive, watch, h, computed } from 'vue'
 import Player, { Events } from 'xgplayer'
 
 import FlvPlugin from 'xgplayer-flv'
 import 'xgplayer/dist/index.min.css'
-import { LiveVideoInfoItem } from '/@/api/liveflv'
+import { LiveVideoInfo, CameraInfo, VideoInfo, LiveFlvInfo } from '/@/api/liveflv'
+import { getLiveUrlBySn, stopLiveBySn } from '/@/api/iot'
 import {
   CameraOutlined,
   VideoCameraOutlined,
@@ -94,21 +94,19 @@ import {
 } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import RefreshPlugin from './RefreshPlugin.js'
+import { useMyStore } from '/@/store'
+import { refreshToken } from '/@/api/manage'
 
 const props = defineProps({
   compentId: String,
   videoInfo: Object
 })
 
+const store = useMyStore()
+
 const videoSize = {
   width: 640,
   height: 360
-}
-
-interface SelectOption {
-  value: any,
-  label: string,
-  more?: any
 }
 
 const playerConfig = {
@@ -130,38 +128,64 @@ const playerConfig = {
   },
   playbackRate: [],
   keyShortcut: false,
-  // lang: 'zh',
+  lang: 'zh',
   refresh: true
 }
 
 let player: Player
 
 const liveUrl = ref<string>('')
-const enablePayload = ref(true)
-const cameraMode = ref(1)
+const isPayloadIndex = ref(false)
+const cameraMode = ref(0)
 const photoState = ref(0)
 const recordingState = ref(0)
+const controlSource = ref<string>('')
+const currentVideoInfo = reactive({} as LiveFlvInfo)
+
 const droneList = ref()
 const cameraList = ref()
-const currentVideoInfo = reactive({} as LiveVideoInfoItem)
-
-const pluginName = function (p) {
-  // 插件逻辑
-  console.log(p)
-}
 
 onMounted(() => {
-  Player.install('pluginName', pluginName)
   console.log('isHevcSupported', Player.isHevcSupported())
-  const info = props.videoInfo as LiveVideoInfoItem
-  // liveVideoInfo.value = info
+  const info = props.videoInfo as LiveFlvInfo
   Object.assign(currentVideoInfo, info)
+  if (!info.isPayloadIndex) {
+    isPayloadIndex.value = info.isPayloadIndex
+  }
 })
 
-watch(() => currentVideoInfo.url, (newUrl, oldUrl) => {
-  console.log('当前视频URL', newUrl)
-  startVideo(newUrl)
+watch([() => currentVideoInfo.sn, () => currentVideoInfo.cameraIndex], ([newSn, newIndex], [oldSn, oldIndex]) => {
+  console.log('onCameraIndexChange', newSn, newIndex)
+  startGetVideoUrl(newSn, newIndex)
 })
+
+const droneOsd = computed(() => {
+  return store.state.deviceState.deviceInfo[currentVideoInfo.sn]
+})
+
+watch(droneOsd.value, (n, o) => {
+  const payload = n.cameras?.find(c => c.payload_index === currentVideoInfo.cameraIndex)
+  if (payload !== undefined) {
+    cameraMode.value = payload.camera_mode
+    photoState.value = payload.photo_state
+    recordingState.value = payload.recording_state
+  }
+})
+
+function startGetVideoUrl (sn: string, index: string) {
+  getLiveUrlBySn(sn, index)
+    .then(res => {
+      if (res.code === 200) {
+        const item = res.data
+        const playUrl = item[index]
+        console.log(playUrl)
+        liveUrl.value = playUrl.httpFlvUrl
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
 
 // watch([() => cameraMode.value, photoState.value, recordingState.value], ([newCm, newPs, newRs], [oldCm, oldPs, oldRs]) => {
 //   console.log('更新', newCm)
@@ -170,6 +194,10 @@ watch(() => currentVideoInfo.url, (newUrl, oldUrl) => {
 //   }
 //   console.log(oldCm, oldPs, oldRs)
 // })
+
+watch(liveUrl, (newUrl, oldUrl) => {
+  startVideo(newUrl)
+})
 
 function startVideo (videoUrl: string) {
   if (player !== undefined) {
@@ -184,7 +212,6 @@ function startVideo (videoUrl: string) {
   } else {
     openNotification('URL 不合法')
   }
-  liveUrl.value = videoUrl
 }
 
 onUnmounted(() => {
@@ -194,8 +221,7 @@ onUnmounted(() => {
 })
 
 function reloadVideoUrl () {
-  const newVideoUrl = liveUrl.value
-  currentVideoInfo.url = newVideoUrl
+  player.retry()
 }
 
 function isLegalLiveUrl (newVideoUrl: string) {
@@ -203,7 +229,8 @@ function isLegalLiveUrl (newVideoUrl: string) {
 }
 
 function requestPayloadControl () {
-
+  // DO request
+  controlSource.value = 'A'
 }
 
 function takePhoto () {

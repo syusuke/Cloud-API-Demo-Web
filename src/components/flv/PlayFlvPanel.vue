@@ -1,61 +1,85 @@
 <template>
   <div class="header">FLV视频播放</div>
   <div class="parent">
-    <template v-for="(item, index) in   urlsList  " :key="index">
-      <PlayFlvPlayer class="child" :compent-id="'mse-' + index" :video-info="item" />
+    <template v-for="(item, index) in  liveFlvList " :key="index">
+      <PlayFlvPlayer class="child" :compent-id="'mse-' + index" :video-info="item"/>
     </template>
-
-    <!-- <a-row :gutter="[8, 8]">
-      <template v-for="(item, index) in   urlsList  " :key="index">
-        <a-col :span="12">
-          <PlayFlvPlayer class="child-grid" :compent-id="'mse-' + index" :video-info="item" />
-        </a-col>
-      </template>
-    </a-row> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from '@vue/reactivity'
-import { onMounted } from 'vue'
+import { reactive, ref, computed } from '@vue/reactivity'
+import { onMounted, watch } from 'vue'
 import PlayFlvPlayer from '/@/components/flv/PlayFlvPlayer.vue'
-import { LiveVideoInfoItem } from '/@/api/liveflv'
+import { EDeviceTypeName, ELocalStorageKey } from '/@/types'
+import { getDeviceTopo, getLiveCapacity, getDeviceLiveCapacity, } from '/@/api/manage'
+import { useMyStore } from '/@/store'
+import { Device, DeviceInfoType, OnlineDevice, PayloadInfo } from '/@/types/device'
+import { CameraInfo, VideoInfo, LiveFlvInfo, LiveCapacity } from '/@/api/liveflv'
 
-const urlsList = ref<LiveVideoInfoItem[]>([])
+const store = useMyStore()
+
+const workspaceId = ref(localStorage.getItem(ELocalStorageKey.WorkspaceId)!)
+
+const liveFlvList = ref<LiveFlvInfo[]>([])
+
+const payloads = ref<PayloadInfo[]>()
+
+const selectOnlineDock = computed(() => {
+  return store.state.onlineDock
+})
+
+const droneOsd = computed()
 
 onMounted(() => {
-  // urlsList.value[0] = 'http://localhost:8080/hdl/live/4k264.flv'
-  urlsList.value = [{
-    url: 'http://localhost:8080/hdl/live/4k264.flv',
-    sn: '',
-    cameraIndex: '',
-    state: {
-      mode: 1
-    }
-  }, {
-    url: 'http://localhost:8080/hdl/live/4k264.flv',
-    sn: '',
-    cameraIndex: '',
-    state: {
-      mode: 1
-    }
-  }, {
-    url: 'http://localhost:8080/hdl/live/4k264.flv',
-    sn: '',
-    cameraIndex: '',
-    state: {
-      mode: 1
-    }
-  }, {
-    url: 'http://localhost:8080/hdl/live/4k264.flv',
-    sn: '',
-    cameraIndex: '',
-    state: {
-      mode: 1
-    }
-  }]
-  console.log('urlsList size = ', urlsList.value.length)
 })
+
+watch(selectOnlineDock, (newValue, oldValue) => {
+  console.log('CN', newValue)
+  // change to dock info
+  loadDockVideo(newValue.gateway.sn, newValue.payload)
+})
+
+function loadDockVideo (dockSn: string, pys: PayloadInfo[]) {
+  getDockLiveCapacity(dockSn)
+  if (pys.length > 0) {
+    payloads.value = pys
+  }
+}
+
+function getDockLiveCapacity (sn: string) {
+  getDeviceLiveCapacity(sn)
+      .then(res => {
+        if (res.code === 0) {
+          console.log('getDockLiveCapacity', sn, res.data)
+          updateLiveCapacity(sn, res.data)
+        }
+      })
+}
+
+function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
+  console.log('cameraList', cameraList)
+
+  liveFlvList.value = []
+
+  for (const camera of cameraList) {
+    const isPayload = payloads.value?.find(idx => {
+      return idx.payload_index === camera.index && idx.payload_sn === sn
+    })
+
+    // LiveVideoInfo
+    liveFlvList.value.push({
+      sn: sn,
+      cameraIndex: camera.index,
+      cameraInfo: {
+        index: camera.index,
+        name: camera.name,
+        videoList: camera.videos_list
+      },
+      isPayloadIndex: isPayload === undefined
+    })
+  }
+}
 
 </script>
 

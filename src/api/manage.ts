@@ -75,6 +75,11 @@ export const getLiveCapacity = async function (body: {}): Promise<IWorkspaceResp
   const result = await request.get(url, body)
   return result.data
 }
+export const getDeviceLiveCapacity = async function (sn: string): Promise<IWorkspaceResponse<any>> {
+  const url = `${HTTP_PREFIX}/live/camera/capacity/${sn}`
+  const result = await request.get(url)
+  return result.data
+}
 
 // Start Livestream
 export const startLivestream = async function (body: {}): Promise<IWorkspaceResponse<any>> {

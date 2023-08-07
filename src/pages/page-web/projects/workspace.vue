@@ -19,7 +19,7 @@
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.PLANJOB">
         <PlanJobPanel />
       </div>
-      <div class="task-wrapper" v-if="root.$route.name === ERouterName.LIVEFLV">
+      <div class="task-wrapper" v-if="root.$route.name === ERouterName.FLV_DEVICE">
         <PlayFlvPanel />
       </div>
     </div>
@@ -118,6 +118,7 @@ const messageHandler = async (payload: any) => {
       EventBus.emit('droneControlWs', payload)
       break
     }
+
     default:
       break
   }

@@ -54,9 +54,8 @@ import { message } from 'ant-design-vue'
 import { onMounted, reactive, ref } from 'vue'
 import { CURRENT_CONFIG as config } from '/@/api/http/config'
 import { changeLivestreamLens, getLiveCapacity, setLivestreamQuality, stopLivestream } from '/@/api/manage'
-import { getBrowserLiveUrl, iotStopLive } from '/@/api/iot'
+import { getLiveUrlBySn, stopLiveBySn } from '/@/api/iot'
 import { getRoot } from '/@/root'
-import flvjs from 'flv.js'
 const root = getRoot()
 
 interface SelectOption {
@@ -139,9 +138,6 @@ const onRefresh = async () => {
 }
 
 onMounted(() => {
-  if (!flvjs.isSupported()) {
-    alert('浏览器不支持flv.js')
-  }
   onRefresh()
 })
 
@@ -164,20 +160,12 @@ const onStart = async () => {
 
   currentSn.value = droneSelected.value
 
-  getBrowserLiveUrl(currentSn.value)
+  getLiveUrlBySn(currentSn.value)
     .then(res => {
       if (res.code === 0) {
         const data = res.data
         const httpFlvUrl = data.httpFlvUrl
         console.log('playURL', httpFlvUrl)
-        const videoElement = videowebrtc.value
-        const player = flvjs.createPlayer({
-          type: 'flv',
-          url: httpFlvUrl
-        })
-        player.attachMediaElement(document.getElementById('myVideo'))
-        player.load()
-        player.play()
       }
       console.log('getBrowserLiveUrl', res)
     })
@@ -186,7 +174,7 @@ const onStart = async () => {
     })
 }
 const onStop = () => {
-  iotStopLive(currentSn.value)
+  stopLiveBySn(currentSn.value)
     .then(res => {
       if (res.code === 0) {
         message.success(res.message)

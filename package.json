@@ -83,6 +83,7 @@
         "ant-design-vue/es/input-number/style/css",
         "ant-design-vue/es/input/style/css",
         "ant-design-vue/es/layout/style/css",
+        "ant-design-vue/es/list/style/css",
         "ant-design-vue/es/menu/style/css",
         "ant-design-vue/es/message/style/css",
         "ant-design-vue/es/modal/style/css",

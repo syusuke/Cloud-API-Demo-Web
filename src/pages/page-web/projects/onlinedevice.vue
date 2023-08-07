@@ -1,16 +1,17 @@
 <!-- <template>
   <div>
-    <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #4f4f4f; font-weight: 450;">
-      <a-row>
-        <a-col :span="1"></a-col>
-        <a-col :span="20">在线机场列表ABC</a-col>
-      </a-row>
-      <a-row>
-        <template v-for="item of deviceList" v-bind:key="item.device_sn">
-          <span @click="onDeviceSelect(item)">{{ item.device_sn }}</span>
-        </template>
-      </a-row>
-    </div>
+  <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #4f4f4f; font-weight: 450;">
+    <a-row>
+      <a-col :span="1"></a-col>
+      <a-col :span="20">在线机场列表</a-col>
+    </a-row>
+    <a-row>
+      <template v-for="item of deviceList" v-bind:key="item.device_sn">
+        <span @click="onDeviceSelect(item)">{{ item.device_sn }}</span>
+      </template>
+    </a-row>
+  </div>
+  <router-view/>
   </div>
 </template>
 

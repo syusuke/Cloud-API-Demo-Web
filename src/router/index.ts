@@ -129,33 +129,43 @@ const routes: Array<RouteRecordRaw> = [
         ]
       },
       {
-        path: '/' + ERouterName.LIVEFLV,
-        name: ERouterName.LIVEFLV,
-        component: () => import('/@/pages/page-web/projects/liveflv.vue')
+        path: '/' + ERouterName.FLV_DEVICE,
+        name: ERouterName.FLV_DEVICE,
+        component: () => import('/@/pages/page-web/projects/flvdevice.vue'),
+        // children: [
+        //   {
+        //     path: ERouterName.LIVEFLV,
+        //     name: ERouterName.LIVEFLV,
+        //     component: {
+        //       LiveFlv,
+        //       PlayFlvPanel
+        //     }
+        //   }
+        // ]
+      },
+      // pilot
+      {
+        path: '/' + ERouterName.PILOT,
+        name: ERouterName.PILOT,
+        component: () => import('/@/pages/page-pilot/pilot-index.vue'),
+      },
+      {
+        path: '/' + ERouterName.PILOT_HOME,
+        component: () => import('/@/pages/page-pilot/pilot-home.vue')
+      },
+      {
+        path: '/' + ERouterName.PILOT_MEDIA,
+        component: () => import('/@/pages/page-pilot/pilot-media.vue')
+      },
+      {
+        path: '/' + ERouterName.PILOT_LIVESHARE,
+        component: () => import('/@/pages/page-pilot/pilot-liveshare.vue')
+      },
+      {
+        path: '/' + ERouterName.PILOT_BIND,
+        component: () => import('/@/pages/page-pilot/pilot-bind.vue')
       }
     ]
-  },
-  // pilot
-  {
-    path: '/' + ERouterName.PILOT,
-    name: ERouterName.PILOT,
-    component: () => import('/@/pages/page-pilot/pilot-index.vue'),
-  },
-  {
-    path: '/' + ERouterName.PILOT_HOME,
-    component: () => import('/@/pages/page-pilot/pilot-home.vue')
-  },
-  {
-    path: '/' + ERouterName.PILOT_MEDIA,
-    component: () => import('/@/pages/page-pilot/pilot-media.vue')
-  },
-  {
-    path: '/' + ERouterName.PILOT_LIVESHARE,
-    component: () => import('/@/pages/page-pilot/pilot-liveshare.vue')
-  },
-  {
-    path: '/' + ERouterName.PILOT_BIND,
-    component: () => import('/@/pages/page-pilot/pilot-bind.vue')
   }
 ]
 

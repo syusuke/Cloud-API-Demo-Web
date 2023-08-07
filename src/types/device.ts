@@ -1,6 +1,13 @@
 import { commonColor } from '/@/utils/color'
 import { NightLightsStateEnum, DistanceLimitStatus, ObstacleAvoidance } from './device-setting'
-import { AlarmModeEnum, BatteryStoreModeEnum, DroneBatteryStateEnum, FourGLinkStateEnum, SdrLinkStateEnum, LinkWorkModeEnum } from './airport-tsa'
+import {
+  AlarmModeEnum,
+  BatteryStoreModeEnum,
+  DroneBatteryStateEnum,
+  FourGLinkStateEnum,
+  SdrLinkStateEnum,
+  LinkWorkModeEnum
+} from './airport-tsa'
 import { CameraMode } from '/@/types/live-stream'
 
 export interface DeviceValue {
@@ -22,7 +29,7 @@ export enum DOMAIN {
 export enum DRONE_TYPE {
   M30 = 67,
   M300 = 60,
-  Mavic3EnterpriseAdvanced= 77,
+  Mavic3EnterpriseAdvanced = 77,
   M350 = 89,
 }
 
@@ -169,7 +176,7 @@ export interface OnlineDevice {
 // 固件升级类型
 export enum DeviceFirmwareTypeEnum {
   ToUpgraded = 3, // 普通升级
-  ConsistencyUpgrade =2, // 一致性升级
+  ConsistencyUpgrade = 2, // 一致性升级
 }
 
 // 固件升级状态
@@ -194,6 +201,7 @@ export const DeviceFirmwareStatusColor = {
   [DeviceFirmwareStatusEnum.DuringUpgrade]: commonColor.NORMAL,
 }
 
+
 export interface Device {
   device_name: string,
   device_sn: string,
@@ -208,6 +216,7 @@ export interface Device {
   domain: number,
   type: number,
   firmware_progress?: string, // 升级进度
+  payloads_list: []
 }
 
 export interface DeviceStatus {
@@ -246,6 +255,7 @@ export interface OsdCameraLiveview {
   right: number,
   top: number,
 }
+
 export interface DeviceOsdCamera {
   camera_mode: CameraMode,
   payload_index: string,
@@ -367,11 +377,13 @@ export interface DockBasicOsd {
   // live_capacity?: LiveCapacity; // 直播能力
   // live_status?: Array<LiveStatus>; // 直播状态
 }
+
 export enum DrcStateEnum {
   DISCONNECT = 0,
   CONNECTING = 1,
   CONNECTED = 2
 }
+
 export interface DockLinkOsd {
   drc_state: DrcStateEnum,
   flighttask_prepare_capacity: number,
@@ -384,7 +396,7 @@ export interface DockLinkOsd {
     down_quality: string,
     frequency_band: number,
   },
-  wireless_link?:{ // 图传链路<会包括4G和sdr信息
+  wireless_link?: { // 图传链路<会包括4G和sdr信息
     dongle_number: number, // dongle 数量
     ['4g_link_state']: FourGLinkStateEnum, // 4g_link_state
     sdr_link_state: SdrLinkStateEnum, // sdr链路连接状态
