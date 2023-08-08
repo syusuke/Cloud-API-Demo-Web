@@ -70,6 +70,7 @@
         "ant-design-vue/es/avatar/style/css",
         "ant-design-vue/es/breadcrumb/style/css",
         "ant-design-vue/es/button/style/css",
+        "ant-design-vue/es/card/style/css",
         "ant-design-vue/es/checkbox/style/css",
         "ant-design-vue/es/col/style/css",
         "ant-design-vue/es/collapse/style/css",

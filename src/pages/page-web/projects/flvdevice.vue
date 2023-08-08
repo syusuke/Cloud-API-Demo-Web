@@ -7,7 +7,12 @@
       </a-row>
       <a-row>
         <template v-for="item of onlineDocks.data" v-bind:key="item.sn">
-          <span @click="onDockSelect(item)">{{ item.sn }}</span>
+          <div @click="onDockSelect(item)" style="background: #abc; width: 100%; cursor: pointer">
+            <span >{{ item.gateway.sn }}</span>
+            <br/>
+            <span>{{ item.sn }}</span>
+          </div>
+
         </template>
       </a-row>
     </div>

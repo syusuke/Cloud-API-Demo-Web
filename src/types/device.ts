@@ -201,7 +201,6 @@ export const DeviceFirmwareStatusColor = {
   [DeviceFirmwareStatusEnum.DuringUpgrade]: commonColor.NORMAL,
 }
 
-
 export interface Device {
   device_name: string,
   device_sn: string,

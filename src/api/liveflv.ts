@@ -28,6 +28,7 @@ export interface LiveVideoInfo {
 
 export interface LiveFlvInfo {
   sn: string,
+  name: null | string,
   cameraIndex: string,
   cameraInfo: CameraInfo,
   isPayloadIndex: boolean,

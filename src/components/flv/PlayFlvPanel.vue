@@ -26,10 +26,10 @@ const liveFlvList = ref<LiveFlvInfo[]>([])
 const payloads = ref<PayloadInfo[]>()
 
 const selectOnlineDock = computed(() => {
-  return store.state.onlineDock
+  return store.state?.onlineDock
 })
 
-const droneOsd = computed()
+// const droneOsd = computed()
 
 onMounted(() => {
 })
@@ -37,46 +37,46 @@ onMounted(() => {
 watch(selectOnlineDock, (newValue, oldValue) => {
   console.log('CN', newValue)
   // change to dock info
-  loadDockVideo(newValue.gateway.sn, newValue.payload)
+  loadDockVideo(newValue.gateway.sn, newValue.sn, newValue.payload)
 })
 
-function loadDockVideo (dockSn: string, pys: PayloadInfo[]) {
-  getDockLiveCapacity(dockSn)
+function loadDockVideo (dockSn: string, droneSn: string, pys: PayloadInfo[]) {
+  liveFlvList.value = []
+  fetchLiveCapacity(dockSn)
+  fetchLiveCapacity(droneSn)
   if (pys.length > 0) {
     payloads.value = pys
   }
 }
 
-function getDockLiveCapacity (sn: string) {
+function fetchLiveCapacity (sn: string) {
   getDeviceLiveCapacity(sn)
-      .then(res => {
-        if (res.code === 0) {
-          console.log('getDockLiveCapacity', sn, res.data)
-          updateLiveCapacity(sn, res.data)
-        }
-      })
+    .then(res => {
+      if (res.code === 0) {
+        console.log('getDockLiveCapacity', sn, res.data)
+        updateLiveCapacity(sn, res.data)
+      }
+    })
 }
 
 function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
-  console.log('cameraList', cameraList)
-
-  liveFlvList.value = []
-
   for (const camera of cameraList) {
     const isPayload = payloads.value?.find(idx => {
-      return idx.payload_index === camera.index && idx.payload_sn === sn
+      return idx.payload_index === camera.index
     })
+    console.log('updateLiveCapacity', sn, 'payload:', isPayload, '. camera:', camera)
 
     // LiveVideoInfo
     liveFlvList.value.push({
       sn: sn,
+      name: sn,
       cameraIndex: camera.index,
       cameraInfo: {
         index: camera.index,
         name: camera.name,
         videoList: camera.videos_list
       },
-      isPayloadIndex: isPayload === undefined
+      isPayloadIndex: isPayload !== undefined
     })
   }
 }
@@ -99,7 +99,8 @@ function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
   display: flex;
   flex-flow: row wrap;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+  overflow: auto;
 }
 
 .child {

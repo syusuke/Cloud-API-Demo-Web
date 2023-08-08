@@ -12,7 +12,11 @@
               </template>
               拍照模式
             </a-tag>
+            <a-tag color="default">
+              {{ photoState === 0 ? '空闲中' : '拍照中' }}
+            </a-tag>
             <a-button type="primary" size="small" @click="requestPayloadControl" danger>获取负载控制权</a-button>
+            <a-button type="primary" size="small" @click="changeCameraMode">切换模式</a-button>
             <a-button type="primary" size="small" :disabled="!(photoState === 0)" @click="takePhoto">拍照</a-button>
           </a-space>
         </template>
@@ -25,7 +29,11 @@
               </template>
               录制模式
             </a-tag>
+            <a-tag color="default">
+              {{ recordingState === 0 ? '空闲中' : '录像中' }}
+            </a-tag>
             <a-button type="primary" size="small" @click="requestPayloadControl" danger>获取负载控制权</a-button>
+            <a-button type="primary" size="small" @click="changeCameraMode">切换模式</a-button>
             <a-button type="primary" size="small" :disabled="!(recordingState === 0)" @click="startRecording">开始录像
             </a-button>
             <a-button type="primary" size="small" :disabled="!(recordingState === 1)" @click="stopRecording">停止录像
@@ -57,18 +65,24 @@
           <a-tooltip title="刷新列表">
             <a-button type="primary" shape="circle" size="small" :icon="h(RedoOutlined)"/>
           </a-tooltip>
-          <a-select style="width:150px" placeholder="选择设备">
+          <a-select style="width: 300px" placeholder="选择设备" @change="onDroneSelect">
             <a-select-option v-for="item in droneList" :key="item.value" :value="item.value">
-              {{ item.label }}
+              {{ item.value }}
             </a-select-option>
           </a-select>
-          <a-select style="width:150px" placeholder="选择摄像头">
+          <a-select style="width: 300px" placeholder="选择摄像头">
             <a-select-option v-for="item in cameraList" :key="item.value" :value="item.value">
-              {{ item.label }}
+              {{ item.value }}
             </a-select-option>
           </a-select>
 
-          <a-button type="primary">获取URL</a-button>
+        </a-space>
+      </div>
+      <div class="flex-row flex-justify-center flex-align-center mt10">
+        <a-space wrap>
+          <span>{{ selectDrone?.value }}</span>
+          <span>{{ selectCamera?.value }}</span>
+          <a-button type="primary" @click="getLiveUrl">获取URL</a-button>
           <a-button type="primary">开始直播</a-button>
           <a-button type="primary">停止直播</a-button>
         </a-space>
@@ -79,12 +93,13 @@
 
 <script lang="ts" setup>
 import { ref } from '@vue/reactivity'
-import { onMounted, onUnmounted, defineProps, reactive, watch, h, computed } from 'vue'
+import { onMounted, onUnmounted, defineProps, reactive, watch, h, computed, openBlock } from 'vue'
 import Player, { Events } from 'xgplayer'
 
 import FlvPlugin from 'xgplayer-flv'
 import 'xgplayer/dist/index.min.css'
 import { LiveVideoInfo, CameraInfo, VideoInfo, LiveFlvInfo } from '/@/api/liveflv'
+import { PayloadCommandsEnum, postPayloadAuth, postPayloadCommands } from '/@/api/drone-control/payload'
 import { getLiveUrlBySn, stopLiveBySn } from '/@/api/iot'
 import {
   CameraOutlined,
@@ -95,7 +110,6 @@ import {
 import { notification } from 'ant-design-vue'
 import RefreshPlugin from './RefreshPlugin.js'
 import { useMyStore } from '/@/store'
-import { refreshToken } from '/@/api/manage'
 
 const props = defineProps({
   compentId: String,
@@ -132,26 +146,50 @@ const playerConfig = {
   refresh: true
 }
 
+interface SelectOption {
+  value: any,
+  label: string,
+}
+
 let player: Player
 
 const liveUrl = ref<string>('')
 const isPayloadIndex = ref(false)
-const cameraMode = ref(0)
+const cameraMode = ref(-1)
 const photoState = ref(0)
 const recordingState = ref(0)
-const controlSource = ref<string>('')
 const currentVideoInfo = reactive({} as LiveFlvInfo)
 
-const droneList = ref()
-const cameraList = ref()
+const droneList = ref<SelectOption[]>([])
+const cameraList = ref<SelectOption[]>([])
+
+const selectDrone = ref<SelectOption>()
+const selectCamera = ref<SelectOption>()
 
 onMounted(() => {
   console.log('isHevcSupported', Player.isHevcSupported())
   const info = props.videoInfo as LiveFlvInfo
   Object.assign(currentVideoInfo, info)
-  if (!info.isPayloadIndex) {
-    isPayloadIndex.value = info.isPayloadIndex
+
+  isPayloadIndex.value = info.isPayloadIndex
+
+  selectDrone.value = {
+    label: info.name ?? info.sn,
+    value: info.sn
   }
+  selectCamera.value = {
+    label: info.cameraInfo.name ?? info.cameraInfo.index,
+    value: info.cameraInfo.index
+  }
+
+  droneList.value.push({
+    label: info.name ?? info.sn,
+    value: info.sn
+  })
+  cameraList.value.push({
+    label: info.cameraInfo.name ?? info.cameraInfo.index,
+    value: info.cameraInfo.index
+  })
 })
 
 watch([() => currentVideoInfo.sn, () => currentVideoInfo.cameraIndex], ([newSn, newIndex], [oldSn, oldIndex]) => {
@@ -160,15 +198,19 @@ watch([() => currentVideoInfo.sn, () => currentVideoInfo.cameraIndex], ([newSn, 
 })
 
 const droneOsd = computed(() => {
-  return store.state.deviceState.deviceInfo[currentVideoInfo.sn]
+  return store.state?.deviceState?.deviceInfo
 })
 
-watch(droneOsd.value, (n, o) => {
-  const payload = n.cameras?.find(c => c.payload_index === currentVideoInfo.cameraIndex)
-  if (payload !== undefined) {
-    cameraMode.value = payload.camera_mode
-    photoState.value = payload.photo_state
-    recordingState.value = payload.recording_state
+watch(droneOsd.value, (newDeviceOsdMap, o) => {
+  const currentOsd = newDeviceOsdMap[currentVideoInfo.sn]
+  if (currentOsd !== undefined) {
+    const payload = currentOsd.cameras?.find(c => c.payload_index === currentVideoInfo.cameraIndex)
+    if (payload !== undefined) {
+      console.log('findPayload', payload)
+      cameraMode.value = payload.camera_mode
+      photoState.value = payload.photo_state
+      recordingState.value = payload.recording_state
+    }
   }
 })
 
@@ -228,20 +270,91 @@ function isLegalLiveUrl (newVideoUrl: string) {
   return newVideoUrl.startsWith('http://') || newVideoUrl.startsWith('https://')
 }
 
+function onDroneSelect () {
+
+}
+
+function getLiveUrl () {
+  if (selectDrone.value !== undefined && selectCamera.value !== undefined) {
+    getLiveUrlBySn(selectDrone.value?.value, selectCamera.value?.value)
+      .then(res => {
+        if (res.code === 200) {
+          console.log('getLiveUrl', res.data)
+        }
+      })
+  }
+}
+
 function requestPayloadControl () {
-  // DO request
-  controlSource.value = 'A'
+  postPayloadAuth(currentVideoInfo.sn, { payload_index: currentVideoInfo.cameraIndex })
+    .then(res => {
+      if (res.code === 0) {
+        openNotification('负载控制权获取成功')
+      } else {
+        openNotification(res.message, '失败')
+      }
+    })
+}
+
+function changeCameraMode () {
+  postPayloadCommands(currentVideoInfo.sn, {
+    cmd: PayloadCommandsEnum.CameraModeSwitch,
+    data: {
+      camera_mode: cameraMode.value === 0 ? 1 : 0,
+      payload_index: currentVideoInfo.cameraIndex
+    }
+  }).then(res => {
+    if (res.code === 0) {
+      openNotification('切换成功')
+    } else {
+      openNotification(res.message, '失败')
+    }
+  })
 }
 
 function takePhoto () {
-
+  postPayloadCommands(currentVideoInfo.sn, {
+    cmd: PayloadCommandsEnum.CameraPhotoTake,
+    data: {
+      payload_index: currentVideoInfo.cameraIndex
+    }
+  }).then(res => {
+    if (res.code === 0) {
+      openNotification('负载控制权获取成功')
+    } else {
+      openNotification(res.message, '失败')
+    }
+  })
 }
 
 function startRecording () {
-
+  postPayloadCommands(currentVideoInfo.sn, {
+    cmd: PayloadCommandsEnum.CameraRecordingStart,
+    data: {
+      payload_index: currentVideoInfo.cameraIndex
+    }
+  }).then(res => {
+    if (res.code === 0) {
+      openNotification('负载控制权获取成功')
+    } else {
+      openNotification(res.message, '失败')
+    }
+  })
 }
 
 function stopRecording () {
+  postPayloadCommands(currentVideoInfo.sn, {
+    cmd: PayloadCommandsEnum.CameraRecordingStop,
+    data: {
+      payload_index: currentVideoInfo.cameraIndex
+    }
+  }).then(res => {
+    if (res.code === 0) {
+      openNotification('负载控制权获取成功')
+    } else {
+      openNotification(res.message, '失败')
+    }
+  })
 }
 
 function openNotification (description: string, title: string = '通知') {
