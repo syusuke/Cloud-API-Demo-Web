@@ -1,81 +1,95 @@
 <template>
   <div class="project-wayline-wrapper height-100">
     <a-spin :spinning="loading" :delay="300" tip="downloading" size="large">
-    <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #4f4f4f; font-weight: 450;">
-      <a-row>
-        <a-col :span="1"></a-col>
-        <a-col :span="15">Flight Route Library</a-col>
-        <a-col :span="8" v-if="importVisible" class="flex-row flex-justify-end flex-align-center">
-          <a-upload
-            name="file"
-            :multiple="false"
-            :before-upload="beforeUpload"
-            :show-upload-list="false"
-            :customRequest="uploadFile"
-          >
-            <a-button type="text" style="color: white;">
-              <SelectOutlined />
-            </a-button>
-          </a-upload>
-        </a-col>
-      </a-row>
-    </div>
-    <div :style="{ height : height + 'px'}" class="scrollbar">
-      <div id="data" class="height-100 uranus-scrollbar" v-if="waylinesData.data.length !== 0" @scroll="onScroll">
-        <div v-for="wayline in waylinesData.data" :key="wayline.id">
-          <div class="wayline-panel" style="padding-top: 5px;" @click="selectRoute(wayline)">
-            <div class="title">
-              <a-tooltip :title="wayline.name">
-                <div class="pr10" style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{ wayline.name }}</div>
-              </a-tooltip>
-              <div class="ml10"><UserOutlined /></div>
-              <a-tooltip :title="wayline.user_name">
-                <div class="ml5 pr10" style="width: 80px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">{{ wayline.user_name }}</div>
-              </a-tooltip>
-              <div class="fz20">
-                <a-dropdown>
-                  <a style="color: white;">
-                    <EllipsisOutlined />
-                  </a>
-                  <template #overlay>
-                    <a-menu theme="dark" class="more" style="background: #3c3c3c;">
-                      <a-menu-item @click="downloadWayline(wayline.id, wayline.name)">
-                        <span>Download</span>
-                      </a-menu-item>
-                      <a-menu-item @click="showWaylineTip(wayline.id)">
-                        <span>Delete</span>
-                      </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
+      <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #4f4f4f; font-weight: 450;">
+        <a-row>
+          <a-col :span="1"></a-col>
+          <a-col :span="15">Flight Route Library</a-col>
+          <a-col :span="8" v-if="importVisible" class="flex-row flex-justify-end flex-align-center">
+            <a-upload
+                name="file"
+                :multiple="false"
+                :before-upload="beforeUpload"
+                :show-upload-list="false"
+                :customRequest="uploadFile"
+            >
+              <a-button type="text" style="color: white;">
+                <SelectOutlined/>
+              </a-button>
+            </a-upload>
+          </a-col>
+        </a-row>
+      </div>
+      <div :style="{ height : height + 'px'}" class="scrollbar">
+        <div id="data" class="height-100 uranus-scrollbar" v-if="waylinesData.data.length !== 0" @scroll="onScroll">
+          <div v-for="wayline in waylinesData.data" :key="wayline.id">
+            <div class="wayline-panel" style="padding-top: 5px;" @click="selectRoute(wayline)">
+              <div class="title">
+                <a-tooltip :title="wayline.name">
+                  <div class="pr10"
+                       style="width: 120px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                    {{ wayline.name }}
+                  </div>
+                </a-tooltip>
+                <div class="ml10">
+                  <UserOutlined/>
+                </div>
+                <a-tooltip :title="wayline.user_name">
+                  <div class="ml5 pr10"
+                       style="width: 80px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                    {{ wayline.user_name }}
+                  </div>
+                </a-tooltip>
+                <div class="fz20">
+                  <a-dropdown>
+                    <a style="color: white;">
+                      <EllipsisOutlined/>
+                    </a>
+                    <template #overlay>
+                      <a-menu theme="dark" class="more" style="background: #3c3c3c;">
+                        <a-menu-item @click="showInMap(wayline.id, wayline.name)">
+                          <span>显示</span>
+                        </a-menu-item>
+                        <a-menu-item @click="downloadWayline(wayline.id, wayline.name)">
+                          <span>下载</span>
+                        </a-menu-item>
+                        <a-menu-item @click="showWaylineTip(wayline.id)">
+                          <span>删除</span>
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </div>
               </div>
-            </div>
-            <div class="ml10 mt5" style="color: hsla(0,0%,100%,0.65);">
-              <span><RocketOutlined /></span>
-              <span class="ml5">{{ Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(wayline.drone_model_key)] }}</span>
-              <span class="ml10"><CameraFilled style="border-top: 1px solid; padding-top: -3px;" /></span>
-              <span class="ml5" v-for="payload in wayline.payload_model_keys" :key="payload.id">
+              <div class="ml10 mt5" style="color: hsla(0,0%,100%,0.65);">
+                <span><RocketOutlined/></span>
+                <span class="ml5">{{
+                    Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(wayline.drone_model_key)]
+                  }}</span>
+                <span class="ml10"><CameraFilled style="border-top: 1px solid; padding-top: -3px;"/></span>
+                <span class="ml5" v-for="payload in wayline.payload_model_keys" :key="payload.id">
                 {{ Object.keys(EDeviceType)[Object.values(EDeviceType).indexOf(payload)] }}
               </span>
-            </div>
-            <div class="mt5 ml10" style="color: hsla(0,0%,100%,0.35);">
-              <span class="mr10">Update at {{ new Date(wayline.update_time).toLocaleString() }}</span>
+              </div>
+              <div class="mt5 ml10" style="color: hsla(0,0%,100%,0.35);">
+                <span class="mr10">Update at {{ new Date(wayline.update_time).toLocaleString() }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div v-else>
-        <a-empty :image-style="{ height: '60px', marginTop: '60px' }" />
-      </div>
-      <a-modal v-model:visible="deleteTip" width="450px" :closable="false" :maskClosable="false" centered :okButtonProps="{ danger: true }" @ok="deleteWayline">
+        <div v-else>
+          <a-empty :image-style="{ height: '60px', marginTop: '60px' }"/>
+        </div>
+        <a-modal v-model:visible="deleteTip" width="450px" :closable="false" :maskClosable="false" centered
+                 :okButtonProps="{ danger: true }" @ok="deleteWayline">
           <p class="pt10 pl20" style="height: 50px;">Wayline file is unrecoverable once deleted. Continue?</p>
           <template #title>
-              <div class="flex-row flex-justify-center">
-                  <span>Delete</span>
-              </div>
+            <div class="flex-row flex-justify-center">
+              <span>Delete</span>
+            </div>
           </template>
-      </a-modal>
-    </div>
+        </a-modal>
+      </div>
     </a-spin>
   </div>
 </template>
@@ -84,7 +98,7 @@
 import { reactive } from '@vue/reactivity'
 import { message } from 'ant-design-vue'
 import { onMounted, onUpdated, ref } from 'vue'
-import { deleteWaylineFile, downloadWaylineFile, getWaylineFiles, importKmzFile } from '/@/api/wayline'
+import { deleteWaylineFile, downloadWaylineFile, getByWaylineId, getWaylineFiles, importKmzFile } from '/@/api/wayline'
 import { ELocalStorageKey, ERouterName } from '/@/types'
 import { EllipsisOutlined, RocketOutlined, CameraFilled, UserOutlined, SelectOutlined } from '@ant-design/icons-vue'
 import { EDeviceType } from '/@/types/device'
@@ -92,13 +106,14 @@ import { useMyStore } from '/@/store'
 import { WaylineFile } from '/@/types/wayline'
 import { downloadFile } from '/@/utils/common'
 import { IPage } from '/@/api/http/type'
+import { parseKMZ } from '/@/utils/waypoint-parser'
 import { CURRENT_CONFIG } from '/@/api/http/config'
 import { load } from '@amap/amap-jsapi-loader'
 import { getRoot } from '/@/root'
 
 const loading = ref(false)
 const store = useMyStore()
-const pagination :IPage = {
+const pagination: IPage = {
   page: 1,
   total: -1,
   page_size: 10
@@ -172,6 +187,27 @@ function deleteWayline () {
   })
 }
 
+function showInMap (waylineId: string, fileName: string) {
+  getByWaylineId(waylineId).then(res => {
+    if (!res) {
+      return
+    }
+    return new Blob([res], { type: 'application/zip' })
+  }).then(async zipData => {
+    const buf = await zipData?.arrayBuffer()
+    if (buf !== undefined) {
+      return parseKMZ(buf)
+    }
+  }).then(kmz => {
+    if (kmz !== undefined) {
+      console.log('kmz', kmz)
+      store.commit('SET_RESOLVE_WAYLINE_KMZ', kmz)
+    }
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
 function downloadWayline (waylineId: string, fileName: string) {
   loading.value = true
   downloadWaylineFile(workspaceId, waylineId).then(res => {
@@ -210,6 +246,7 @@ interface FileInfo {
   file: FileItem;
   fileList: FileItem[];
 }
+
 const fileList = ref<FileItem[]>([])
 
 function beforeUpload (file: FileItem) {
@@ -217,6 +254,7 @@ function beforeUpload (file: FileItem) {
   loading.value = true
   return true
 }
+
 const uploadFile = async () => {
   fileList.value.forEach(async (file: FileItem) => {
     const fileData = new FormData()
@@ -250,6 +288,7 @@ const uploadFile = async () => {
   font-size: 13px;
   border-radius: 2px;
   cursor: pointer;
+
   .title {
     display: flex;
     flex-direction: row;
@@ -259,6 +298,7 @@ const uploadFile = async () => {
     margin: 0px 10px 0 10px;
   }
 }
+
 .uranus-scrollbar {
   overflow: auto;
   scrollbar-width: thin;

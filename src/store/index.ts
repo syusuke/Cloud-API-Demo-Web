@@ -84,6 +84,7 @@ const initStateFunc = () => ({
     payloads: null
   } as OSDVisible,
   waylineInfo: {} as WaylineFile,
+  waylineKmz: {},
   dockInfo: {} as Device,
   hmsInfo: {} as {
     [sn: string]: DeviceHms[]
@@ -165,12 +166,18 @@ const mutations: MutationTree<RootStateType> = {
   SET_SELECT_WAYLINE_INFO (state, info) {
     state.waylineInfo = info
   },
+  SET_RESOLVE_WAYLINE_KMZ (state, info) {
+    state.waylineKmz = info
+  },
   SET_SELECT_DOCK_INFO (state, info) {
     state.dockInfo = info
   },
   SET_DEVICE_HMS_INFO (state, info) {
     const hmsList: Array<DeviceHms> = state.hmsInfo[info.sn]
     state.hmsInfo[info.sn] = info.host.concat(hmsList ?? [])
+  },
+  UPDATE_LIVE_CAPACITY (state, info) {
+    console.log('update_live_capacity', info)
   },
   SET_DEVICES_CMD_EXECUTE_INFO (state, info) { // 保存设备指令ws消息推送
     if (!info.sn) {

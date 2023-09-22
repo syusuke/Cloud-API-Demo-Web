@@ -135,7 +135,8 @@ const playerConfig = {
   },
   width: videoSize.width,
   height: videoSize.height,
-  ignores: ['cssfullscreen', 'fullscreen'],
+  // ignores: ['cssfullscreen', 'fullscreen'],
+  ignores: ['cssfullscreen'],
   screenShot: true,
   videoAttributes: {
     crossOrigin: 'anonymous'
@@ -143,7 +144,8 @@ const playerConfig = {
   playbackRate: [],
   keyShortcut: false,
   lang: 'zh',
-  refresh: true
+  refresh: true,
+  playsinline: true,
 }
 
 interface SelectOption {
@@ -206,7 +208,7 @@ watch(droneOsd.value, (newDeviceOsdMap, o) => {
   if (currentOsd !== undefined) {
     const payload = currentOsd.cameras?.find(c => c.payload_index === currentVideoInfo.cameraIndex)
     if (payload !== undefined) {
-      console.log('findPayload', payload)
+      // console.log('findPayload', payload)
       cameraMode.value = payload.camera_mode
       photoState.value = payload.photo_state
       recordingState.value = payload.recording_state
@@ -286,7 +288,7 @@ function getLiveUrl () {
 }
 
 function requestPayloadControl () {
-  postPayloadAuth(currentVideoInfo.sn, { payload_index: currentVideoInfo.cameraIndex })
+  postPayloadAuth(currentVideoInfo.payloadSn!!, { payload_index: currentVideoInfo.cameraIndex })
     .then(res => {
       if (res.code === 0) {
         openNotification('负载控制权获取成功')
@@ -297,7 +299,7 @@ function requestPayloadControl () {
 }
 
 function changeCameraMode () {
-  postPayloadCommands(currentVideoInfo.sn, {
+  postPayloadCommands(currentVideoInfo.payloadSn!, {
     cmd: PayloadCommandsEnum.CameraModeSwitch,
     data: {
       camera_mode: cameraMode.value === 0 ? 1 : 0,
@@ -313,14 +315,14 @@ function changeCameraMode () {
 }
 
 function takePhoto () {
-  postPayloadCommands(currentVideoInfo.sn, {
+  postPayloadCommands(currentVideoInfo.payloadSn!, {
     cmd: PayloadCommandsEnum.CameraPhotoTake,
     data: {
       payload_index: currentVideoInfo.cameraIndex
     }
   }).then(res => {
     if (res.code === 0) {
-      openNotification('负载控制权获取成功')
+      openNotification('拍照成功')
     } else {
       openNotification(res.message, '失败')
     }
@@ -328,14 +330,14 @@ function takePhoto () {
 }
 
 function startRecording () {
-  postPayloadCommands(currentVideoInfo.sn, {
+  postPayloadCommands(currentVideoInfo.payloadSn!, {
     cmd: PayloadCommandsEnum.CameraRecordingStart,
     data: {
       payload_index: currentVideoInfo.cameraIndex
     }
   }).then(res => {
     if (res.code === 0) {
-      openNotification('负载控制权获取成功')
+      openNotification('开始录像成功')
     } else {
       openNotification(res.message, '失败')
     }
@@ -343,14 +345,14 @@ function startRecording () {
 }
 
 function stopRecording () {
-  postPayloadCommands(currentVideoInfo.sn, {
+  postPayloadCommands(currentVideoInfo.payloadSn!, {
     cmd: PayloadCommandsEnum.CameraRecordingStop,
     data: {
       payload_index: currentVideoInfo.cameraIndex
     }
   }).then(res => {
     if (res.code === 0) {
-      openNotification('负载控制权获取成功')
+      openNotification('停止录像成功')
     } else {
       openNotification(res.message, '失败')
     }

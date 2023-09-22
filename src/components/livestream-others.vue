@@ -136,10 +136,6 @@ const liveTypeList: SelectOption[] = [
   {
     value: 2,
     label: 'RTSP'
-  },
-  {
-    value: 3,
-    label: 'GB28181'
   }
 ]
 const clarityList: SelectOption[] = [
@@ -252,10 +248,6 @@ const onStart = async () => {
     case 2: {
       // RTSP
       liveURL = `userName=${config.rtspUserName}&password=${config.rtspPassword}&port=${config.rtspPort}`
-      break
-    }
-    case 3: {
-      liveURL = `serverIP=${config.gbServerIp}&serverPort=${config.gbServerPort}&serverID=${config.gbServerId}&agentID=${config.gbAgentId}&agentPassword=${config.gbPassword}&localPort=${config.gbAgentPort}&channel=${config.gbAgentChannel}`
       break
     }
     default:

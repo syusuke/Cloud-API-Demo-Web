@@ -32,4 +32,5 @@ export interface LiveFlvInfo {
   cameraIndex: string,
   cameraInfo: CameraInfo,
   isPayloadIndex: boolean,
+  payloadSn: null | string
 }

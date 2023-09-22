@@ -1,3 +1,5 @@
+import { useConnectWebSocket } from '/@/hooks/use-connect-websocket'
+
 export enum ERouterName {
     ELEMENT = 'element',
     PROJECT = 'project',
@@ -99,6 +101,8 @@ export enum EBizCode {
     DeviceOnline = 'device_online',
     DeviceOffline = 'device_offline',
     DeviceHms = 'device_hms',
+    // 内部添加的
+    LiveCapacity ='update_live_capacity',
 
     // 机场任务
     FlightTaskProgress = 'flighttask_progress', // 机场任务执行进度

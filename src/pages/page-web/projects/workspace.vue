@@ -1,26 +1,26 @@
 <template>
   <div class="project-app-wrapper">
     <div class="left">
-      <Sidebar />
+      <Sidebar/>
       <div class="main-content uranus-scrollbar dark">
-        <router-view />
+        <router-view/>
       </div>
     </div>
     <div class="middle">
       <div class="map-wrapper">
-        <GMap />
+        <GMap/>
       </div>
       <div class="media-wrapper" v-if="root.$route.name === ERouterName.MEDIA">
-        <MediaPanel />
+        <MediaPanel/>
       </div>
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.TASK">
-        <TaskPanel />
+        <TaskPanel/>
       </div>
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.PLANJOB">
-        <PlanJobPanel />
+        <PlanJobPanel/>
       </div>
       <div class="task-wrapper" v-if="root.$route.name === ERouterName.FLV_DEVICE">
-        <PlayFlvPanel />
+        <PlayFlvPanel/>
       </div>
     </div>
 
@@ -90,6 +90,10 @@ const messageHandler = async (payload: any) => {
       store.commit('SET_DEVICE_HMS_INFO', payload.data)
       break
     }
+    case EBizCode.LiveCapacity: {
+      store.commit('UPDATE_LIVE_CAPACITY', payload.data)
+      break
+    }
     case EBizCode.DeviceReboot:
     case EBizCode.DroneOpen:
     case EBizCode.DroneClose:
@@ -100,8 +104,7 @@ const messageHandler = async (payload: any) => {
     case EBizCode.ChargeOpen:
     case EBizCode.ChargeClose:
     case EBizCode.DeviceFormat:
-    case EBizCode.DroneFormat:
-    {
+    case EBizCode.DroneFormat: {
       store.commit('SET_DEVICES_CMD_EXECUTE_INFO', {
         biz_code: payload.biz_code,
         timestamp: payload.timestamp,
@@ -113,8 +116,7 @@ const messageHandler = async (payload: any) => {
     case EBizCode.FlyToPointProgress:
     case EBizCode.TakeoffToPointProgress:
     case EBizCode.JoystickInvalidNotify:
-    case EBizCode.DrcStatusNotify:
-    {
+    case EBizCode.DrcStatusNotify: {
       EventBus.emit('droneControlWs', payload)
       break
     }

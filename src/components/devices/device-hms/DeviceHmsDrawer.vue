@@ -124,7 +124,7 @@ const hmsColumns: ColumnProps[] = [
   { title: 'Level', dataIndex: 'level', width: '120px', className: 'titleStyle', slots: { customRender: 'level' } },
   { title: 'Device', dataIndex: 'domain', width: '12%', className: 'titleStyle', slots: { customRender: 'domain' } },
   { title: 'Error Code', dataIndex: 'key', width: '20%', className: 'titleStyle', ellipsis: true, slots: { customRender: 'code' } },
-  { title: 'Hms Message', dataIndex: 'message_en', className: 'titleStyle', ellipsis: true, slots: { customRender: 'message' } },
+  { title: 'Hms Message', dataIndex: 'message_zh', className: 'titleStyle', ellipsis: true, slots: { customRender: 'message' } },
   { title: 'Hms Message', dataIndex: 'message_zh', className: 'titleStyle', ellipsis: true, slots: { customRender: 'message' } },
 ]
 
@@ -177,7 +177,7 @@ const param = reactive<HmsQueryBody>({
   sns: [],
   device_sn: '',
   children_sn: '',
-  language: 'en',
+  language: 'zh',
   begin_time: new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0, 0, 0, 0),
   end_time: new Date().setHours(23, 59, 59, 999),
   domain: -1,

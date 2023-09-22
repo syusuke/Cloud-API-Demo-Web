@@ -1,6 +1,7 @@
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { App, reactive } from 'vue'
 import { AMapConfig } from '/@/constants/index'
+import { wgs84togcj02 } from '/@/vendors/coordtransform'
 
 export function useGMapManage () {
   const state = reactive({
@@ -9,14 +10,16 @@ export function useGMapManage () {
     mouseTool: null,
   })
 
-  async function initMap (container: string, app:App) {
+  async function initMap (container: string, app: App) {
     AMapLoader.load({
       ...AMapConfig
     }).then((AMap) => {
       state.aMap = AMap
       state.map = new AMap.Map(container, {
-        center: [113.943225499, 22.577673716],
-        zoom: 15
+        // center: [113.943225499, 22.577673716],
+        // center: [113.441315694, 23.162604328],
+        center: wgs84togcj02(113.441315694, 23.162604328), // 无人机坐标转换成高德坐标系统, 113.441315694, 23.162604328 为测绘院的坐标
+        zoom: 18
       })
       state.mouseTool = new AMap.MouseTool(state.map)
 
@@ -29,7 +32,7 @@ export function useGMapManage () {
     })
   }
 
-  function globalPropertiesConfig (app:App) {
+  function globalPropertiesConfig (app: App) {
     initMap('g-container', app)
   }
 

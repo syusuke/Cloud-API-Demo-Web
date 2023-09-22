@@ -2,7 +2,7 @@
   <div class="header">FLV视频播放</div>
   <div class="parent">
     <template v-for="(item, index) in  liveFlvList " :key="index">
-      <PlayFlvPlayer class="child" :compent-id="'mse-' + index" :video-info="item"/>
+      <PlayFlvPlayer class="child" :compent-id="'mse-' + index" :video-info="item" />
     </template>
   </div>
 </template>
@@ -18,8 +18,6 @@ import { Device, DeviceInfoType, OnlineDevice, PayloadInfo } from '/@/types/devi
 import { CameraInfo, VideoInfo, LiveFlvInfo, LiveCapacity } from '/@/api/liveflv'
 
 const store = useMyStore()
-
-const workspaceId = ref(localStorage.getItem(ELocalStorageKey.WorkspaceId)!)
 
 const liveFlvList = ref<LiveFlvInfo[]>([])
 
@@ -42,24 +40,34 @@ watch(selectOnlineDock, (newValue, oldValue) => {
 
 function loadDockVideo (dockSn: string, droneSn: string, pys: PayloadInfo[]) {
   liveFlvList.value = []
-  fetchLiveCapacity(dockSn)
-  fetchLiveCapacity(droneSn)
+  fetchDookLiveCapacity(dockSn)
+  fetchDroneLiveCapacity(droneSn, dockSn)
   if (pys.length > 0) {
     payloads.value = pys
   }
 }
 
-function fetchLiveCapacity (sn: string) {
+function fetchDookLiveCapacity (sn: string) {
   getDeviceLiveCapacity(sn)
     .then(res => {
       if (res.code === 0) {
         console.log('getDockLiveCapacity', sn, res.data)
-        updateLiveCapacity(sn, res.data)
+        updateLiveCapacity(sn, res.data, null)
       }
     })
 }
 
-function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
+function fetchDroneLiveCapacity (sn: string, dockSn: string) {
+  getDeviceLiveCapacity(sn)
+    .then(res => {
+      if (res.code === 0) {
+        console.log('getDockLiveCapacity', sn, res.data)
+        updateLiveCapacity(sn, res.data, dockSn)
+      }
+    })
+}
+
+function updateLiveCapacity (sn: string, cameraList: LiveCapacity[], dockSn: null | string) {
   for (const camera of cameraList) {
     const isPayload = payloads.value?.find(idx => {
       return idx.payload_index === camera.index
@@ -76,7 +84,8 @@ function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
         name: camera.name,
         videoList: camera.videos_list
       },
-      isPayloadIndex: isPayload !== undefined
+      isPayloadIndex: isPayload !== undefined,
+      payloadSn: dockSn
     })
   }
 }
@@ -99,8 +108,9 @@ function updateLiveCapacity (sn: string, cameraList: LiveCapacity[]) {
   display: flex;
   flex-flow: row wrap;
   width: 100%;
-  min-height: 100%;
-  overflow: auto;
+  height: 100%;
+  // overflow: auto;
+  overflow-y: auto;
 }
 
 .child {

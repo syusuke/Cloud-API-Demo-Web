@@ -3,20 +3,33 @@
   <a-spin :spinning="loading" :delay="1000" tip="downloading" size="large">
     <div class="media-panel-wrapper">
       <a-table class="media-table" :columns="columns" :data-source="mediaData.data" row-key="fingerprint"
-        :pagination="paginationProp" :scroll="{ x: '100%', y: 600 }" @change="refreshData">
+               :pagination="paginationProp" :scroll="{ x: '100%', y: 600 }" @change="refreshData">
         <template v-for="col in ['name', 'path']" #[col]="{ text }" :key="col">
           <a-tooltip :title="text">
-              <a v-if="col === 'name'">{{ text }}</a>
-              <span v-else>{{ text }}</span>
+            <a v-if="col === 'name'">{{ text }}</a>
+            <span v-else>{{ text }}</span>
           </a-tooltip>
         </template>
         <template #original="{ text }">
           {{ text }}
         </template>
         <template #action="{ record }">
-          <a-tooltip title="download">
-            <a class="fz18" @click="downloadMedia(record)"><DownloadOutlined /></a>
-          </a-tooltip>
+          <a-row>
+            <a-col span="6">
+              <a-tooltip title="查看">
+                <a-button class="fz18" type="link" @click="getMediaUrlAndOpen(record)" block>
+                  <FundViewOutlined/>
+                </a-button>
+              </a-tooltip>
+            </a-col>
+            <a-col span="6">
+              <a-tooltip title="下载">
+                <a class="fz18" @click="downloadMedia(record)" target="_blank">
+                  <DownloadOutlined/>
+                </a>
+              </a-tooltip>
+            </a-col>
+          </a-row>
         </template>
       </a-table>
     </div>
@@ -30,8 +43,8 @@ import { onMounted, reactive } from 'vue'
 import { IPage } from '../api/http/type'
 import { ELocalStorageKey } from '../types/enums'
 import { downloadFile } from '../utils/common'
-import { downloadMediaFile, getMediaFiles } from '/@/api/media'
-import { DownloadOutlined } from '@ant-design/icons-vue'
+import { downloadMediaFile, getMediaFiles, getMediaFileUrl } from '/@/api/media'
+import { DownloadOutlined, FundViewOutlined } from '@ant-design/icons-vue'
 import { message, Pagination } from 'ant-design-vue'
 import { load } from '@amap/amap-jsapi-loader'
 
@@ -43,14 +56,15 @@ const columns = [
     title: 'File Name',
     dataIndex: 'file_name',
     ellipsis: true,
+    width: 320,
     slots: { customRender: 'name' }
   },
-  {
-    title: 'File Path',
-    dataIndex: 'file_path',
-    ellipsis: true,
-    slots: { customRender: 'path' }
-  },
+  // {
+  //   title: 'File Path',
+  //   dataIndex: 'file_path',
+  //   ellipsis: true,
+  //   slots: { customRender: 'path' }
+  // },
   // {
   //   title: 'FileSize',
   //   dataIndex: 'size',
@@ -140,21 +154,32 @@ function downloadMedia (media: MediaFile) {
   })
 }
 
+async function getMediaUrlAndOpen (media: MediaFile) {
+  // loading.value = true
+  await getMediaFileUrl(workspaceId, media.file_id)
+  // console.log('getMediaUrlAndOpen', url)
+  // if (url !== null) {
+  //   window.open(url!)
+  // }
+}
 </script>
 
 <style lang="scss" scoped>
 .media-panel-wrapper {
   width: 100%;
   padding: 16px;
+
   .media-table {
     background: #fff;
     margin-top: 10px;
   }
+
   .action-area {
     color: $primary;
     cursor: pointer;
   }
 }
+
 .header {
   width: 100%;
   height: 60px;

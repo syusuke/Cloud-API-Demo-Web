@@ -1,5 +1,5 @@
 {
-  "name": "demo-web",
+  "name": "DJI Flight Web",
   "version": "0.0.1",
   "scripts": {
     "serve": "vite",
@@ -12,7 +12,6 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@ant-design/icons-vue": "^6.0.1",
     "@vitejs/plugin-legacy": "^1.6.2",
-    "agora-rtc-sdk-ng": "^4.12.1",
     "ant-design-vue": "^2.2.8",
     "axios": "^0.21.1",
     "eventemitter3": "^5.0.0",
@@ -20,6 +19,7 @@
     "mqtt": "^4.3.7",
     "query-string": "^7.0.1",
     "reconnecting-websocket": "^4.4.0",
+    "uzip": "^0.20201231.0",
     "vconsole": "^3.8.1",
     "vite-plugin-components": "^0.13.3",
     "vite-plugin-importer": "^0.2.5",
@@ -64,7 +64,6 @@
         "@amap/amap-jsapi-loader",
         "@ant-design/icons-vue",
         "@vue/reactivity",
-        "agora-rtc-sdk-ng",
         "ant-design-vue",
         "ant-design-vue/es",
         "ant-design-vue/es/avatar/style/css",
@@ -112,6 +111,7 @@
         "mqtt",
         "mqtt/dist/mqtt.min",
         "reconnecting-websocket",
+        "uzip",
         "vconsole",
         "vue",
         "vue-router",

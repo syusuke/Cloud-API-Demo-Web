@@ -12,9 +12,25 @@ export const getWaylineFiles = async function (wid: string, body: {}): Promise<I
   return result.data
 }
 
-// Download Wayline File
+// Download Wayline File with url
 export const downloadWaylineFile = async function (workspaceId: string, waylineId: string): Promise<any> {
   const url = `${HTTP_PREFIX}/workspaces/${workspaceId}/waylines/${waylineId}/url`
+  const result = await request.get(url, { responseType: 'blob' })
+  if (result.data.type === 'application/json') {
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      const text = reader.result as string
+      const result = JSON.parse(text)
+      message.error(result.message)
+    }
+    reader.readAsText(result.data, 'utf-8')
+  } else {
+    return result.data
+  }
+}
+
+export const getByWaylineId = async function ( waylineId: string): Promise<any> {
+  const url = `${HTTP_PREFIX}/workspaces/waylineId/wayline/${waylineId}`
   const result = await request.get(url, { responseType: 'blob' })
   if (result.data.type === 'application/json') {
     const reader = new FileReader()
