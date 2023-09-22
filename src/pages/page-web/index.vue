@@ -68,6 +68,8 @@ const loginBtnDisabled = computed(() => {
 })
 
 const onSubmit = async (e: any) => {
+  root.$router.push(ERouterName.MEMBERS)
+  /*
   const result = await login(formState)
   if (result.code === 0) {
     localStorage.setItem(ELocalStorageKey.Token, result.data.access_token)
@@ -78,7 +80,7 @@ const onSubmit = async (e: any) => {
     root.$router.push(ERouterName.MEMBERS)
   } else {
     message.error(result.message)
-  }
+  } */
 }
 
 </script>
